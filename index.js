@@ -2,28 +2,26 @@ import escapeStringRegexp from 'escape-string-regexp';
 import transliterate from '@sindresorhus/transliterate';
 import builtinOverridableReplacements from './overridable-replacements.js';
 
-const decamelize = string => {
-	return string
-		// Separate capitalized words.
-		.replace(/([A-Z]{2,})(\d+)/g, '$1 $2')
-		.replace(/([a-z\d]+)([A-Z]{2,})/g, '$1 $2')
+const decamelize = string => string
+	// Separate capitalized words.
+	.replaceAll(/([A-Z]{2,})(\d+)/g, '$1 $2')
+	.replaceAll(/([a-z\d]+)([A-Z]{2,})/g, '$1 $2')
 
-		.replace(/([a-z\d])([A-Z])/g, '$1 $2')
-		// `[a-rt-z]` matches all lowercase characters except `s`.
-		// This avoids matching plural acronyms like `APIs`.
-		.replace(/([A-Z]+)([A-Z][a-rt-z\d]+)/g, '$1 $2');
-};
+	.replaceAll(/([a-z\d])([A-Z])/g, '$1 $2')
+	// `[a-rt-z]` matches all lowercase characters except `s`.
+	// This avoids matching plural acronyms like `APIs`.
+	.replaceAll(/([A-Z]+)([A-Z][a-rt-z\d]+)/g, '$1 $2');
 
 const removeMootSeparators = (string, separator) => {
 	const escapedSeparator = escapeStringRegexp(separator);
 
 	return string
-		.replace(new RegExp(`${escapedSeparator}{2,}`, 'g'), separator)
-		.replace(new RegExp(`^${escapedSeparator}|${escapedSeparator}$`, 'g'), '');
+		.replaceAll(new RegExp(`${escapedSeparator}{2,}`, 'g'), separator)
+		.replaceAll(new RegExp(`^${escapedSeparator}|${escapedSeparator}$`, 'g'), '');
 };
 
 const buildPatternSlug = options => {
-	let negationSetPattern = 'a-z\\d';
+	let negationSetPattern = String.raw`a-z\d`;
 	negationSetPattern += options.lowercase ? '' : 'A-Z';
 
 	if (options.preserveCharacters.length > 0) {
@@ -52,7 +50,7 @@ export default function slugify(string, options) {
 		preserveLeadingUnderscore: false,
 		preserveTrailingDash: false,
 		preserveCharacters: [],
-		...options
+		...options,
 	};
 
 	const shouldPrependUnderscore = options.preserveLeadingUnderscore && string.startsWith('_');
@@ -60,7 +58,7 @@ export default function slugify(string, options) {
 
 	const customReplacements = new Map([
 		...builtinOverridableReplacements,
-		...options.customReplacements
+		...options.customReplacements,
 	]);
 
 	string = transliterate(string, {customReplacements});
@@ -77,10 +75,10 @@ export default function slugify(string, options) {
 
 	// Detect contractions/possessives by looking for any word followed by a `'t`
 	// or `'s` in isolation and then remove it.
-	string = string.replace(/([a-zA-Z\d]+)'([ts])(\s|$)/g, '$1$2$3');
+	string = string.replaceAll(/([a-zA-Z\d]+)'([ts])(\s|$)/g, '$1$2$3');
 
 	string = string.replace(patternSlug, options.separator);
-	string = string.replace(/\\/g, '');
+	string = string.replaceAll('\\', '');
 
 	if (options.separator) {
 		string = removeMootSeparators(string, options.separator);

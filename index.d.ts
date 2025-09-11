@@ -1,4 +1,4 @@
-export interface Options {
+export type Options = {
 	/**
 	@default '-'
 
@@ -151,7 +151,7 @@ export interface Options {
 	```
 	*/
 	readonly preserveCharacters?: string[];
-}
+};
 
 /**
 Slugify a string.
@@ -177,7 +177,7 @@ slugify('я люблю единорогов');
 */
 export default function slugify(string: string, options?: Options): string;
 
-export interface CountableSlugify {
+export type CountableSlugify = {
 	/**
 	Reset the counter.
 
@@ -241,6 +241,6 @@ export interface CountableSlugify {
 	You can then use `slugifyWithCounter()` to generate unique HTML `id`'s to ensure anchors will link to the right headline.
 	*/
 	(string: string, options?: Options): string;
-}
+};
 
 export function slugifyWithCounter(): CountableSlugify;

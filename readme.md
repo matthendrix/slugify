@@ -8,8 +8,8 @@ It handles most major languages, including [German (umlauts)](https://en.wikiped
 
 ## Install
 
-```
-$ npm install @sindresorhus/slugify
+```sh
+npm install @sindresorhus/slugify
 ```
 
 ## Usage
