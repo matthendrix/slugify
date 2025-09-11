@@ -171,6 +171,26 @@ export type Options = {
 	```
 	*/
 	readonly locale?: string | undefined;
+
+	/**
+	Whether to transliterate Unicode characters to ASCII.
+
+	When `false`, non-ASCII characters will be preserved instead of being transliterated. This can improve performance when you don't need transliteration.
+
+	@default true
+
+	@example
+	```
+	import slugify from '@sindresorhus/slugify';
+
+	slugify('Déjà Vu');
+	//=> 'deja-vu'
+
+	slugify('Déjà Vu', {transliterate: false});
+	//=> 'déjà-vu'
+	```
+	*/
+	readonly transliterate?: boolean;
 };
 
 /**

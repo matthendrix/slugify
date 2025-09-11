@@ -16,13 +16,18 @@ const removeMootSeparators = (string, separator) => {
 	const escapedSeparator = escapeStringRegexp(separator);
 
 	return string
-		.replaceAll(new RegExp(`${escapedSeparator}{2,}`, 'g'), separator)
-		.replaceAll(new RegExp(`^${escapedSeparator}|${escapedSeparator}$`, 'g'), '');
+		.replaceAll(new RegExp(`(?:${escapedSeparator}){2,}`, 'g'), separator)
+		.replaceAll(new RegExp(`^(?:${escapedSeparator})|(?:${escapedSeparator})$`, 'g'), '');
 };
 
 const buildPatternSlug = options => {
 	let negationSetPattern = String.raw`a-z\d`;
 	negationSetPattern += options.lowercase ? '' : 'A-Z';
+
+	// When transliteration is disabled, preserve Unicode characters
+	if (options.transliterate === false) {
+		negationSetPattern += String.raw`\p{L}\p{N}`;
+	}
 
 	if (options.preserveCharacters.length > 0) {
 		for (const character of options.preserveCharacters) {
@@ -34,7 +39,8 @@ const buildPatternSlug = options => {
 		}
 	}
 
-	return new RegExp(`[^${negationSetPattern}]+`, 'g');
+	const flags = options.transliterate ? 'g' : 'gu';
+	return new RegExp(`[^${negationSetPattern}]+`, flags);
 };
 
 export default function slugify(string, options) {
@@ -50,18 +56,26 @@ export default function slugify(string, options) {
 		preserveLeadingUnderscore: false,
 		preserveTrailingDash: false,
 		preserveCharacters: [],
+		transliterate: true,
 		...options,
 	};
 
 	const shouldPrependUnderscore = options.preserveLeadingUnderscore && string.startsWith('_');
 	const shouldAppendDash = options.preserveTrailingDash && string.endsWith('-');
 
-	const customReplacements = new Map([
-		...builtinOverridableReplacements,
-		...options.customReplacements,
-	]);
+	if (options.transliterate) {
+		const customReplacements = new Map([
+			...builtinOverridableReplacements,
+			...options.customReplacements,
+		]);
 
-	string = transliterate(string, {customReplacements, locale: options.locale});
+		string = transliterate(string, {customReplacements, locale: options.locale});
+	} else if (options.customReplacements.length > 0) {
+		// Apply custom replacements even when transliteration is disabled
+		for (const [key, value] of options.customReplacements) {
+			string = string.replaceAll(key, value);
+		}
+	}
 
 	if (options.decamelize) {
 		string = decamelize(string);
@@ -70,12 +84,12 @@ export default function slugify(string, options) {
 	const patternSlug = buildPatternSlug(options);
 
 	if (options.lowercase) {
-		string = string.toLowerCase();
+		string = options.locale ? string.toLocaleLowerCase(options.locale) : string.toLowerCase();
 	}
 
-	// Detect contractions/possessives by looking for any word followed by a `'t`
-	// or `'s` in isolation and then remove it.
-	string = string.replaceAll(/([a-zA-Z\d]+)'([ts])(\s|$)/g, '$1$2$3');
+	// Detect contractions/possessives by looking for any word followed by a `'t` or `'s`
+	// in isolation and then remove it. Handles both straight and curly apostrophes.
+	string = string.replaceAll(/([a-zA-Z\d]+)['\u2019]([ts])(\s|$)/g, '$1$2$3');
 
 	string = string.replace(patternSlug, options.separator);
 	string = string.replaceAll('\\', '');

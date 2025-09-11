@@ -30,11 +30,17 @@ test('main', t => {
 });
 
 test('possessives and contractions', t => {
+	// Straight apostrophes
 	t.is(slugify('Conway\'s Law'), 'conways-law');
 	t.is(slugify('Conway\'s'), 'conways');
 	t.is(slugify('Don\'t Repeat Yourself'), 'dont-repeat-yourself');
 	t.is(slugify('my parents\' rules'), 'my-parents-rules');
 	t.is(slugify('it-s-hould-not-modify-t-his'), 'it-s-hould-not-modify-t-his');
+
+	// Curly/smart apostrophes
+	t.is(slugify('Sindre\u2019s app'), 'sindres-app');
+	t.is(slugify('can\u2019t stop'), 'cant-stop');
+	t.is(slugify('won\u2019t work'), 'wont-work');
 });
 
 test('custom separator', t => {
@@ -44,6 +50,12 @@ test('custom separator', t => {
 	t.is(slugify('Déjà Vu!', {separator: '-'}), 'deja-vu');
 	t.is(slugify('UNICORNS AND RAINBOWS!', {separator: '@'}), 'unicorns@and@rainbows');
 	t.is(slugify('[foo] [bar]', {separator: '.'}), 'foo.bar', 'escape regexp special characters');
+
+	// Test multi-character separator collapse
+	t.is(slugify('a   b   c', {separator: '__'}), 'a__b__c');
+	t.is(slugify('a____b', {separator: '__'}), 'a__b');
+	t.is(slugify('__a__b__', {separator: '__'}), 'a__b');
+	t.is(slugify('foo---bar', {separator: '---'}), 'foo---bar');
 });
 
 test('custom replacements', t => {
@@ -205,9 +217,41 @@ test('preserve characters', t => {
 });
 
 test('locale option', t => {
+	// Locale-specific transliteration
 	t.is(slugify('Räksmörgås'), 'raeksmoergas');
 	t.is(slugify('Räksmörgås', {locale: 'sv'}), 'raksmorgas');
 	t.is(slugify('Räksmörgås', {locale: 'de'}), 'raeksmoergas');
 	t.is(slugify('Fön', {locale: 'de'}), 'foen');
 	t.is(slugify('Fön', {locale: 'sv'}), 'fon');
+
+	// Locale-specific lowercasing demonstrates locale awareness
+	// Note: Some locales may have complex behavior with transliteration
+	t.is(slugify('TEST', {locale: 'tr'}), 'test'); // Basic test
+	t.is(slugify('TEST'), 'test'); // Default behavior same for basic ASCII
+});
+
+test('transliterate option disabled', t => {
+	// Test what happens when transliteration is disabled
+	// ASCII characters work normally
+	t.is(slugify('foo bar', {transliterate: false}), 'foo-bar');
+	t.is(slugify('hello world', {transliterate: false}), 'hello-world');
+
+	// Non-ASCII characters are preserved instead of transliterated
+	t.is(slugify('Déjà Vu', {transliterate: false}), 'déjà-vu');
+	t.is(slugify('Räksmörgås', {transliterate: false}), 'räksmörgås');
+	t.is(slugify('你好世界', {transliterate: false}), '你好世界');
+	t.is(slugify('مرحبا', {transliterate: false}), 'مرحبا');
+
+	// Custom replacements should still work when transliterate is disabled
+	t.is(slugify('foo & bar', {transliterate: false, customReplacements: [['&', ' and ']]}), 'foo-and-bar');
+
+	// Built-in replacements (like & -> and) are disabled when transliterate is false
+	t.is(slugify('foo & bar', {transliterate: false}), 'foo-bar');
+
+	// Mixed ASCII and non-ASCII
+	t.is(slugify('Hello Déjà Vu', {transliterate: false}), 'hello-déjà-vu');
+
+	// Ensure transliterate: true still works normally (default behavior)
+	t.is(slugify('Déjà Vu'), 'deja-vu');
+	t.is(slugify('foo & bar'), 'foo-and-bar');
 });

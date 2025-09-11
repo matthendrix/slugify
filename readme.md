@@ -223,6 +223,25 @@ slugify('Räksmörgås', {locale: 'sv'});
 //=> 'raksmorgas'
 ```
 
+##### transliterate
+
+Type: `boolean`\
+Default: `true`
+
+Whether to transliterate Unicode characters to ASCII.
+
+When `false`, non-ASCII characters will be preserved instead of being transliterated. This can improve performance when you don't need transliteration.
+
+```js
+import slugify from '@sindresorhus/slugify';
+
+slugify('Déjà Vu');
+//=> 'deja-vu'
+
+slugify('Déjà Vu', {transliterate: false});
+//=> 'déjà-vu'
+```
+
 ### slugifyWithCounter()
 
 Returns a new instance of `slugify(string, options?)` with a counter to handle multiple occurrences of the same string.
