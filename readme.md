@@ -204,6 +204,25 @@ slugify('foo_bar#baz', {preserveCharacters: ['#']});
 //=> 'foo-bar#baz'
 ```
 
+##### locale
+
+Type: `string`\
+Default: `undefined`
+
+The locale to use for language-specific transliteration.
+
+See the [`@sindresorhus/transliterate` package](https://github.com/sindresorhus/transliterate#locale) for more info.
+
+```js
+import slugify from '@sindresorhus/slugify';
+
+slugify('Räksmörgås');
+//=> 'raeksmoergas'
+
+slugify('Räksmörgås', {locale: 'sv'});
+//=> 'raksmorgas'
+```
+
 ### slugifyWithCounter()
 
 Returns a new instance of `slugify(string, options?)` with a counter to handle multiple occurrences of the same string.

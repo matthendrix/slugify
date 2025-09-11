@@ -61,7 +61,7 @@ export default function slugify(string, options) {
 		...options.customReplacements,
 	]);
 
-	string = transliterate(string, {customReplacements});
+	string = transliterate(string, {customReplacements, locale: options.locale});
 
 	if (options.decamelize) {
 		string = decamelize(string);

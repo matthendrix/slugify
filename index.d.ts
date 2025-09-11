@@ -151,6 +151,26 @@ export type Options = {
 	```
 	*/
 	readonly preserveCharacters?: string[];
+
+	/**
+	The locale to use for language-specific transliteration.
+
+	See the [`@sindresorhus/transliterate` package](https://github.com/sindresorhus/transliterate#locale) for more info.
+
+	@default undefined
+
+	@example
+	```
+	import slugify from '@sindresorhus/slugify';
+
+	slugify('Räksmörgås');
+	//=> 'raeksmoergas'
+
+	slugify('Räksmörgås', {locale: 'sv'});
+	//=> 'raksmorgas'
+	```
+	*/
+	readonly locale?: string | undefined;
 };
 
 /**

@@ -203,3 +203,11 @@ test('preserve characters', t => {
 		slugify('foo', {separator: '.', preserveCharacters: ['.']});
 	});
 });
+
+test('locale option', t => {
+	t.is(slugify('Räksmörgås'), 'raeksmoergas');
+	t.is(slugify('Räksmörgås', {locale: 'sv'}), 'raksmorgas');
+	t.is(slugify('Räksmörgås', {locale: 'de'}), 'raeksmoergas');
+	t.is(slugify('Fön', {locale: 'de'}), 'foen');
+	t.is(slugify('Fön', {locale: 'sv'}), 'fon');
+});
