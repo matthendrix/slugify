@@ -1,3 +1,4 @@
+// Turns arbitrary text into URL/filename-safe slugs; use when you need stable, readable identifiers.
 import escapeStringRegexp from 'escape-string-regexp';
 import transliterate from '@sindresorhus/transliterate';
 import builtinOverridableReplacements from './overridable-replacements.js';
